@@ -88,6 +88,13 @@ public class gmpuJob implements Callable<Integer>{
         }else f.renameTo(new File(f.toString().toLowerCase()));
     }
     
+    private String buildExecutablePath(String path, String executable){
+        if (!GmodPublishingUtility.unixSys){ //windows
+            return "\"" + path + File.separatorChar + executable + "\"";
+        }
+        return path + File.separatorChar + executable; //linux
+    }
+    
     @Override
     public Integer call() throws Exception {
         int exitStatus=0,createGMAExitStatus=0;
@@ -106,7 +113,8 @@ public class gmpuJob implements Callable<Integer>{
                 try {
                     this.listReturn=new ArrayList<>();
                     GmodPublishingUtility.gmpuLogger.log(Level.INFO, "Retreving list of Addons.");
-                    pb = new ProcessBuilder("\""+GmodPublishingUtility.gmpublishPath+File.separatorChar+GmodPublishingUtility.gmpublish+"\"","list");
+                    //pb = new ProcessBuilder("\""+GmodPublishingUtility.gmpublishPath+File.separatorChar+GmodPublishingUtility.gmpublish+"\"","list");
+                    pb = new ProcessBuilder(this.buildExecutablePath(GmodPublishingUtility.gmpublishPath, GmodPublishingUtility.gmpublish),"list");
                     pb.directory(new File(GmodPublishingUtility.gmpublishPath));
                     p = pb.start();
                     stdout = new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -145,7 +153,8 @@ public class gmpuJob implements Callable<Integer>{
                     try {
                         GmodPublishingUtility.gmpuLogger.log(Level.INFO, "Extracting " + this.extractName + ".");
                         //s = "\""+GmodPublishingUtility.gmadPath+File.separatorChar+GmodPublishingUtility.gmad;//+"\" extract -file"+this.extractName;
-                        s = "\""+GmodPublishingUtility.gmadPath+File.separatorChar+GmodPublishingUtility.gmad+"\"";
+                        //s = "\""+GmodPublishingUtility.gmadPath+File.separatorChar+GmodPublishingUtility.gmad+"\"";
+                        s = this.buildExecutablePath(GmodPublishingUtility.gmadPath, GmodPublishingUtility.gmad);
                         if (this.extractOut.length()!=0){
                             //s+=" -out "+this.extractOut;
                             pb = new ProcessBuilder(s,"extract","-file",this.extractName,"-out",this.extractOut);
@@ -214,7 +223,8 @@ public class gmpuJob implements Callable<Integer>{
 
                             GmodPublishingUtility.gmpuLogger.log(Level.INFO, "Creating temporary gma.");
                             this.createGmaOut="temp.gma";
-                            s = "\""+GmodPublishingUtility.gmadPath+File.separatorChar+GmodPublishingUtility.gmad + "\"";
+                            //s = "\""+GmodPublishingUtility.gmadPath+File.separatorChar+GmodPublishingUtility.gmad + "\"";
+                            s = this.buildExecutablePath(GmodPublishingUtility.gmadPath,GmodPublishingUtility.gmad);
                             pb = new ProcessBuilder(s,"create","-folder",this.createGmaFolder,"-out",this.createGmaOut);
                             pb.directory(new File(GmodPublishingUtility.gmadPath));
                             //p = r.exec("\""+GmodPublishingUtility.gmadPath+File.pathSeparator+GmodPublishingUtility.gmad + "\" create -folder "+this.createGmaFolder+ " -out "+this.createGmaOut, null, new File(GmodPublishingUtility.gmadPath));
@@ -234,7 +244,8 @@ public class gmpuJob implements Callable<Integer>{
 
                         if (createGMAExitStatus==0){
                             //s="\""+GmodPublishingUtility.gmpublishPath+File.pathSeparator+GmodPublishingUtility.gmpublish+"\" update -addon "+this.createGmaOut+" -id "+this.updateID;
-                            s="\""+GmodPublishingUtility.gmpublishPath+File.separatorChar+GmodPublishingUtility.gmpublish+"\"";
+                            //s="\""+GmodPublishingUtility.gmpublishPath+File.separatorChar+GmodPublishingUtility.gmpublish+"\"";
+                            s=this.buildExecutablePath(GmodPublishingUtility.gmpublishPath, GmodPublishingUtility.gmpublish);
                             if (this.updateChanges.length()==0){
                                 pb = new ProcessBuilder(s,"update","-addon",this.createGmaOut,"-id",this.updateID);
                             }else{
@@ -325,7 +336,8 @@ public class gmpuJob implements Callable<Integer>{
 
                                 GmodPublishingUtility.gmpuLogger.log(Level.INFO, "Creating temporary gma.");
                                 this.createGmaOut="temp.gma";
-                                s = "\""+GmodPublishingUtility.gmadPath+File.separatorChar+GmodPublishingUtility.gmad + "\"";
+                                //s = "\""+GmodPublishingUtility.gmadPath+File.separatorChar+GmodPublishingUtility.gmad + "\"";
+                                s = this.buildExecutablePath(GmodPublishingUtility.gmadPath, GmodPublishingUtility.gmad);
                                 pb = new ProcessBuilder(s,"create","-folder",this.createGmaFolder,"-out",this.createGmaOut);
                                 pb.directory(new File(GmodPublishingUtility.gmadPath));
                                 //p = r.exec("\""+GmodPublishingUtility.gmadPath+File.pathSeparator+GmodPublishingUtility.gmad + "\" create -folder "+this.createGmaFolder+ " -out "+this.createGmaOut, null, new File(GmodPublishingUtility.gmadPath));
@@ -346,7 +358,8 @@ public class gmpuJob implements Callable<Integer>{
 
                             String addonID="";
                             if (createGMAExitStatus==0){
-                                s="\""+GmodPublishingUtility.gmpublishPath+File.separatorChar+GmodPublishingUtility.gmpublish+"\"";
+                                //s="\""+GmodPublishingUtility.gmpublishPath+File.separatorChar+GmodPublishingUtility.gmpublish+"\"";
+                                s=this.buildExecutablePath(GmodPublishingUtility.gmpublishPath, GmodPublishingUtility.gmpublish);
                                 pb = new ProcessBuilder(s,"create","-addon",this.createGmaOut,"-icon",this.createIcon);
                                 pb.directory(new File(GmodPublishingUtility.gmpublishPath));
                                 //p = r.exec("\""+GmodPublishingUtility.gmpublishPath+File.pathSeparator+GmodPublishingUtility.gmpublish+"\" create -addon "+this.createGmaOut+" -icon "+this.createIcon, null, new File(GmodPublishingUtility.gmpublishPath));
@@ -430,7 +443,8 @@ public class gmpuJob implements Callable<Integer>{
                         }
 
                         GmodPublishingUtility.gmpuLogger.log(Level.INFO, "Creating GMA from "+this.createGmaFolder);
-                        s = "\""+GmodPublishingUtility.gmadPath+File.separatorChar+GmodPublishingUtility.gmad + "\"";
+                        //s = "\""+GmodPublishingUtility.gmadPath+File.separatorChar+GmodPublishingUtility.gmad + "\"";
+                        s = this.buildExecutablePath(GmodPublishingUtility.gmadPath, GmodPublishingUtility.gmad);
                         pb = new ProcessBuilder(s,"create","-folder",this.createGmaFolder,"-out",this.createGmaOut);
                         pb.directory(new File(GmodPublishingUtility.gmadPath));
                         //p = r.exec("\""+GmodPublishingUtility.gmadPath+File.pathSeparator+GmodPublishingUtility.gmad + "\" create -folder "+this.createGmaFolder+ " -out "+this.createGmaOut, null, new File(GmodPublishingUtility.gmadPath));
